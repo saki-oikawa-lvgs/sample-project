@@ -21,7 +21,6 @@ const Home: NextPage = () => {
         `,
       });
 
-      console.log(data.getTodos)
       setTodos(data.getTodos)
     })()
   },[])

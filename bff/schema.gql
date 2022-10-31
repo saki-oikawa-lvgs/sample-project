@@ -3,10 +3,10 @@
 # ------------------------------------------------------
 
 type Query {
-  todos: [TodoModel!]
+  posts: [PostModel!]
 }
 
-type TodoModel {
+type PostModel {
   Text: String!
   id: String!
 }

@@ -14,7 +14,7 @@ import { GraphQLModule } from '@nestjs/graphql';
         supergraphSdl: new IntrospectAndCompose({
           // ここにサブグラフのGraphQLエンドポイントを追加していく
           subgraphs: [
-            // { name: 'users', url: 'http://user-service/graphql' },
+            { name: 'posts', url: 'http://localhost:8081/query' },
             { name: 'todos', url: 'http://localhost:8080/query' },
           ],
         }),

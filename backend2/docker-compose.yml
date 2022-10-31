@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres
+    # container_name: go-postgresql
+    # build:
+    #   context: .
+    #   dockerfile: ./Docker/postgres/Dockerfile
+    environment:
+      POSTGRES_USER: postgres # user
+      POSTGRES_PASSWORD: postgres # pass
+    ports:
+      - "5433:5433"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - my-network
+
+  app:
+    # container_name: app
+    # depends_on:
+    #   - postgres
+    build: .
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+
+volumes:
+  test_db:
+    external: false
+networks:
+  my-network:
+    external: true
