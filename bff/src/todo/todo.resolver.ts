@@ -1,27 +1,52 @@
 // src/todo/todo.resolver.ts
-import { Args, ID, Query, Resolver } from '@nestjs/graphql';
-import { Todo } from './models/todo.models';
+import { Query, Resolver } from '@nestjs/graphql';
+import { TodoModel } from './models/todo.models';
 import { TodoService } from './todo.service';
+import { HttpService } from '@nestjs/axios';
+// import { map } from 'rxjs';
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  gql,
+} from '@apollo/client/core';
+// import { global } from 'node-fetch';
 
-// Resolverデコレータでresolverを定義
-// https://docs.nestjs.com/graphql/resolvers#code-first-resolver
-@Resolver()
+// global.fetch = require('node-fetch');
+
+@Resolver((of) => TodoModel)
 export class TodoResolver {
-  constructor(private todoService: TodoService) {}
-  // QueryデコレータでQueryを定義
-  // 第一引数にReturnTypeFuncを指定し、型を定義。ここではTodoの配列を指定。
-  // 第二引数にオプションとして{ nullable: 'items' }を与えることでから配列を許容する。[Todo]!と同義。
-  // デフォルトでは [Todo!]! になる。
-  @Query(() => [Todo], { nullable: 'items' })
-  findAll() {
-    return this.todoService.findAll();
-  }
+  // constructor(
+  //   // private PostService: TodoService,
+  //   // private readonly http: HttpService,
+  // ) {}
 
-  @Query(() => Todo)
-  // Queryに引数がある場合はArgsデコレータで定義。
-  // 第一引数に引数の名前、第二引数に型を指定。
-  // schema上の型定義は findOneById(id: ID!): Todo! となる
-  findOneById(@Args('id', { type: () => ID }) id: string) {
-    return this.todoService.findOneById(id);
+  @Query(() => [TodoModel], { name: 'todos', nullable: true })
+  getTodos() {
+    const Query = gql`
+      query getTodos {
+        getTodos {
+          id
+          text
+        }
+      }
+    `;
+
+    const apolloClient = new ApolloClient({
+      uri: 'http://127.0.0.1:8080/query/',
+      cache: new InMemoryCache(),
+    });
+    async function getQuery() {
+      const result = await apolloClient
+        .query({ query: Query })
+        .then((result) => {
+          return JSON.stringify(result, undefined, 2);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      console.log(JSON.stringify(result, undefined, 2));
+    }
+    getQuery();
   }
 }

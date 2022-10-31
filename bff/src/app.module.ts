@@ -1,18 +1,26 @@
+import { IntrospectAndCompose } from '@apollo/gateway';
+import { ApolloGatewayDriver, ApolloGatewayDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-// import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver } from '@nestjs/apollo';
-import * as path from 'path';
-import { PostsModule } from './post/post.module';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot({
-      autoSchemaFile: path.join(process.cwd(), './schema.gql'),
-      sortSchema: true,
-      driver: ApolloDriver,
+    GraphQLModule.forRoot<ApolloGatewayDriverConfig>({
+      driver: ApolloGatewayDriver,
+      server: {
+        // ... Apollo server options autoSchemaFile?
+        cors: true,
+      },
+      gateway: {
+        supergraphSdl: new IntrospectAndCompose({
+          // ここにサブグラフのGraphQLエンドポイントを追加していく
+          subgraphs: [
+            // { name: 'users', url: 'http://user-service/graphql' },
+            { name: 'todos', url: 'http://localhost:8080/query' },
+          ],
+        }),
+      },
     }),
-    PostsModule, // これ
   ],
 })
 export class AppModule {}

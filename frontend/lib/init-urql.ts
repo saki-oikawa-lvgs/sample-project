@@ -5,7 +5,7 @@ export function urqlClient(): Promise<Client> {
   return new Promise((resolve, reject) => {
     const client = initUrqlClient(
       {
-        url: 'http://localhost:3000/graphql',
+        url: 'http://localhost:3000/posts',
       },
       false,
     );

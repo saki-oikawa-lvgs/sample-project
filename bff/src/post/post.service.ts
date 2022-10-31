@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { map } from 'rxjs';
 import { HttpService, HttpModule } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
-
+//使ってない！！！
 @Injectable()
 export class PostService {
   constructor(private readonly http: HttpService) {}
@@ -10,7 +10,6 @@ export class PostService {
     const posts = this.http.get('http://127.0.0.1:1337/api/posts');
     //ここで取れていない？
     // frontend向けにデータを整形するロジック
-
     return posts.pipe(
       map((res) => {
         const formattedData = [];
@@ -18,7 +17,7 @@ export class PostService {
           item.attributes['id'] = item.id;
           formattedData.push(item.attributes);
         });
-        // console.log(formattedData);
+        console.log(formattedData);
         // console.log('formattedData');
 
         return formattedData;

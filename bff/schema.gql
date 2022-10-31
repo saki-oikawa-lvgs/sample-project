@@ -2,11 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type PostModel {
-  Text: String!
-  id: String!
+type Query {
+  todos: [TodoModel!]
 }
 
-type Query {
-  posts: [PostModel!]
+type TodoModel {
+  Text: String!
+  id: String!
 }
