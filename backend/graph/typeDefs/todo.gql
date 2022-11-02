@@ -1,11 +1,11 @@
 # @/graph/typeDefs/todo.gql
-type Todo {
+type Todo @key(fields: "id") {
   id: ID!
   text: String!
   done: Boolean!
+  post_id: 
+  post: Post
 }
-
-
 
 type Mutation {
   createTodo(text: String!): Todo!
@@ -14,3 +14,9 @@ type Mutation {
 type Query {
   getTodos: [Todo!]!
 }
+
+extend type Post @key(fields: "id") {
+    id: ID! @external
+    text: String! @external
+  }
+

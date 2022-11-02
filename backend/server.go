@@ -15,6 +15,7 @@ import (
 
     "github.com/99designs/gqlgen/graphql/handler"
     "github.com/99designs/gqlgen/graphql/playground"
+
 )
 type Ping struct {
   Status int 

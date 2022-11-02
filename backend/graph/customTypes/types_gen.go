@@ -2,8 +2,18 @@
 
 package customTypes
 
+type Post struct {
+	ID   string `json:"id"`
+	Text string `json:"text"`
+}
+
+func (Post) IsEntity() {}
+
 type Todo struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 	Done bool   `json:"done"`
+	Post *Post  `json:"post"`
 }
+
+func (Todo) IsEntity() {}

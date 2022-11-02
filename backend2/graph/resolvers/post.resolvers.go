@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/common"
 	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/customTypes"
 	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/generated"
 )
@@ -17,22 +16,25 @@ func (r *mutationResolver) CreatePost(ctx context.Context, text string) (*custom
 	panic(fmt.Errorf("not implemented: CreatePost - createPost"))
 }
 
+// Todo is the resolver for the todo field.
+func (r *postResolver) Todo(ctx context.Context, obj *customTypes.Post) (*customTypes.Todo, error) {
+	panic(fmt.Errorf("not implemented: Todo - todo"))
+}
+
 // GetPosts is the resolver for the getPosts field.
 func (r *queryResolver) GetPosts(ctx context.Context) ([]*customTypes.Post, error) {
-	context := common.GetContext(ctx)
-	var posts []*customTypes.Post
-	err := context.Database.Find(&posts).Error
-	if err != nil {
-		return nil, err
-	}
-	return posts, nil
+	panic(fmt.Errorf("not implemented: GetPosts - getPosts"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
+// Post returns generated.PostResolver implementation.
+func (r *Resolver) Post() generated.PostResolver { return &postResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+type postResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

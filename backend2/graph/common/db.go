@@ -10,6 +10,7 @@ import (
 func InitDb() (*gorm.DB, error) {
     var err error
 		db, err := gorm.Open("postgres", "host=postgres user=postgres port=5432 password=postgres dbname=postgres sslmode=disable")
+    db.LogMode(true)
 
     if err != nil {
         return nil, err

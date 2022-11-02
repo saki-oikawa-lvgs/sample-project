@@ -16,6 +16,7 @@ const Home: NextPage = () => {
           getTodos{
             id
             text
+            done
           }
         }
         `,
@@ -24,6 +25,7 @@ const Home: NextPage = () => {
       setTodos(data.getTodos)
     })()
   },[])
+  console.log(todos)
 
   return (
     <div className={styles.container}>

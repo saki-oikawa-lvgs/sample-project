@@ -6,4 +6,15 @@ type Post struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 	Done bool   `json:"done"`
+	Todo *Todo  `json:"todo"`
 }
+
+func (Post) IsEntity() {}
+
+type Todo struct {
+	ID   int     `json:"id"`
+	Text string  `json:"text"`
+	Post []*Post `json:"post"`
+}
+
+func (Todo) IsEntity() {}
