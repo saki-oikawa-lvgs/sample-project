@@ -3,7 +3,7 @@ type Todo @key(fields: "id") {
   id: ID!
   text: String!
   done: Boolean!
-  post_id: 
+  post_id: Int!
   post: Post
 }
 
@@ -16,7 +16,8 @@ type Query {
 }
 
 extend type Post @key(fields: "id") {
-    id: ID! @external
+    id: Int! @external
     text: String! @external
+    todo: [Todo] @requires (fields: "id")
   }
 

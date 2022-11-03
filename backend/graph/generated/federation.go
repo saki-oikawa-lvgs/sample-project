@@ -80,6 +80,30 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}()
 
 		switch typeName {
+		case "Post":
+			resolverName, err := entityResolverNameForPost(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "Post": %w`, err)
+			}
+			switch resolverName {
+
+			case "findPostByID":
+				id0, err := ec.unmarshalNInt2int(ctx, rep["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findPostByID(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindPostByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "Post": %w`, err)
+				}
+
+				entity.ID, err = ec.unmarshalNInt2int(ctx, rep["id"])
+				if err != nil {
+					return err
+				}
+				list[idx[i]] = entity
+				return nil
+			}
 		case "Todo":
 			resolverName, err := entityResolverNameForTodo(ctx, rep)
 			if err != nil {
@@ -167,6 +191,23 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		g.Wait()
 		return list
 	}
+}
+
+func entityResolverNameForPost(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findPostByID", nil
+	}
+	return "", fmt.Errorf("%w for Post", ErrTypeNotFound)
 }
 
 func entityResolverNameForTodo(ctx context.Context, rep map[string]interface{}) (string, error) {

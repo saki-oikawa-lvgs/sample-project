@@ -3,17 +3,19 @@
 package customTypes
 
 type Post struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
+	ID   int     `json:"id"`
+	Text string  `json:"text"`
+	Todo []*Todo `json:"todo"`
 }
 
 func (Post) IsEntity() {}
 
 type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	Post *Post  `json:"post"`
+	ID     string `json:"id"`
+	Text   string `json:"text"`
+	Done   bool   `json:"done"`
+	PostID int    `json:"post_id"`
+	Post   *Post  `json:"post"`
 }
 
 func (Todo) IsEntity() {}
