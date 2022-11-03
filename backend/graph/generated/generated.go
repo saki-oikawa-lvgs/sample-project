@@ -14,7 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/customTypes"
+	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/customTypes"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -505,7 +505,7 @@ func (ec *executionContext) _Entity_findPostByID(ctx context.Context, field grap
 	}
 	res := resTmp.(*customTypes.Post)
 	fc.Result = res
-	return ec.marshalNPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
+	return ec.marshalNPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entity_findPostByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -568,7 +568,7 @@ func (ec *executionContext) _Entity_findTodoByID(ctx context.Context, field grap
 	}
 	res := resTmp.(*customTypes.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entity_findTodoByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -635,7 +635,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	}
 	res := resTmp.(*customTypes.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -787,7 +787,7 @@ func (ec *executionContext) _Post_todo(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.([]*customTypes.Todo)
 	fc.Result = res
-	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
+	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Post_todo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -843,7 +843,7 @@ func (ec *executionContext) _Query_getTodos(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*customTypes.Todo)
 	fc.Result = res
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getTodos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1304,7 +1304,7 @@ func (ec *executionContext) _Todo_post(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.(*customTypes.Post)
 	fc.Result = res
-	return ec.marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
+	return ec.marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Todo_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3892,11 +3892,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPost2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v customTypes.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPost2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v customTypes.Post) graphql.Marshaler {
 	return ec._Post(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v *customTypes.Post) graphql.Marshaler {
+func (ec *executionContext) marshalNPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v *customTypes.Post) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3921,11 +3921,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v customTypes.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v customTypes.Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*customTypes.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*customTypes.Todo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3949,7 +3949,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlv
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3969,7 +3969,7 @@ func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlv
 	return ret
 }
 
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v *customTypes.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v *customTypes.Todo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4368,7 +4368,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v *customTypes.Post) graphql.Marshaler {
+func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v *customTypes.Post) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4401,7 +4401,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*customTypes.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v []*customTypes.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4428,7 +4428,7 @@ func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlv
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx, sel, v[i])
+			ret[i] = ec.marshalOTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4442,7 +4442,7 @@ func (ec *executionContext) marshalOTodo2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlv
 	return ret
 }
 
-func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋgqlgen_tutorialᚋserverᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v *customTypes.Todo) graphql.Marshaler {
+func (ec *executionContext) marshalOTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackendᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v *customTypes.Todo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

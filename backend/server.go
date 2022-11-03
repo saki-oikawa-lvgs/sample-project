@@ -5,16 +5,27 @@ package main
 import (
 	"database/sql"
 	"fmt"
-
+  "log"
+	"net/http"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
+  "github.com/saki-oikawa-lvgs/sample-project/backend/graph/generated"
+  "github.com/saki-oikawa-lvgs/sample-project/backend/graph"
+
+
 	// "github.com/uhey22e/sqlboiler-tutor/models"
-  "github.com/saki-oikawa-lvgs/sample-project/backend/todo"
+  // "github.com/saki-oikawa-lvgs/sample-project/backend/models"
+    // "github.com/saki-oikawa-lvgs/sample-project/backend/todo"
+
 
 	// "github.com/volatiletech/null"
 )
 
 func main() {
 	// connect to db
+  const defaultPort = "8080"
 	psqlInfo := fmt.Sprintf("host=postgres user=postgres port=5432 password=postgres dbname=postgres sslmode=disable")
 
 	db, err := sql.Open("postgres", psqlInfo)
@@ -23,16 +34,17 @@ func main() {
 	}
 	defer db.Close()
 
-	// validate whether or not the connection string was correct
-	if err := db.Ping(); err != nil {
-		panic(err)
-	}
+	boil.SetDB(db)
+	boil.DebugMode = true
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	todoApp := &todo.App{
-		db: db,
-	}
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
 
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 
+}
 // @/server.go
 // package main
 

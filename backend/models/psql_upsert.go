@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/volatiletech/sqlboiler/drivers"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
