@@ -27,9 +27,11 @@ services:
     networks:
       - my-network
 
+
 volumes:
   test_db:
     external: false
 networks:
   my-network:
     external: true
+

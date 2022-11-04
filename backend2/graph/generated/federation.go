@@ -88,7 +88,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findPostByID":
-				id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+				id0, err := ec.unmarshalNInt2int(ctx, rep["id"])
 				if err != nil {
 					return fmt.Errorf(`unmarshalling param 0 for findPostByID(): %w`, err)
 				}
@@ -117,10 +117,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return fmt.Errorf(`resolving Entity "Todo": %w`, err)
 				}
 
-				entity.ID, err = ec.unmarshalNInt2int(ctx, rep["id"])
-				if err != nil {
-					return err
-				}
 				list[idx[i]] = entity
 				return nil
 			}

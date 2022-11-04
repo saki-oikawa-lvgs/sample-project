@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/generated"
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/model"
+	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/generated"
+	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/model"
 )
 
 // CreatePost is the resolver for the createPost field.

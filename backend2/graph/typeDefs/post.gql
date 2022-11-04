@@ -1,13 +1,9 @@
 # @/graph/typeDefs/post.gql
 type Post @key(fields: "id") {
-  id: ID!
+  id: Int!
   text: String!
   done: Boolean!
-  todo: Todo
-}
-
-type Mutation {
-  createPost(text: String!): Post!
+  todo: Todo!
 }
 
 type Query {
@@ -16,6 +12,5 @@ type Query {
 
 extend type Todo @key(fields: "id") {
     id: Int! @external
-    text: String! @external
-    post: [Post] @requires (fields: "id")
+    posts: [Post]
   }

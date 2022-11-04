@@ -7,18 +7,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/customTypes"
-	"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/generated"
+	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/customTypes"
+	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/generated"
 )
 
 // FindPostByID is the resolver for the findPostByID field.
-func (r *entityResolver) FindPostByID(ctx context.Context, id string) (*customTypes.Post, error) {
+func (r *entityResolver) FindPostByID(ctx context.Context, id int) (*customTypes.Post, error) {
 	panic(fmt.Errorf("not implemented: FindPostByID - findPostByID"))
 }
 
 // FindTodoByID is the resolver for the findTodoByID field.
 func (r *entityResolver) FindTodoByID(ctx context.Context, id int) (*customTypes.Todo, error) {
-	panic(fmt.Errorf("not implemented: FindTodoByID - findTodoByID"))
+	return &customTypes.Todo{
+		ID: id,
+	}, nil
 }
 
 // Entity returns generated.EntityResolver implementation.

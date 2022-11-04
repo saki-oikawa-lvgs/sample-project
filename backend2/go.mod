@@ -1,4 +1,4 @@
-module github.com/saki-oikawa-lvgs/gqlgen_tutorial/server
+module github.com/saki-oikawa-lvgs/sample-project/backend2
 
 go 1.17
 

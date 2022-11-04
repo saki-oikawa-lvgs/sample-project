@@ -1,7 +1,7 @@
 package common
 
 import (
-		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/customTypes"
+		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/customTypes"
 
 		"github.com/jinzhu/gorm"
 		_ "github.com/lib/pq"

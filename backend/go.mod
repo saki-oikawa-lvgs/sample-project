@@ -8,6 +8,7 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/lib/pq v1.2.1-0.20191011153232-f91d3411e481
+	github.com/rs/cors v1.8.2
 	github.com/saki-oikawa-lvgs/gqlgen_tutorial/server v0.0.0-20221031011736-b6f1c2a71a59
 	github.com/spf13/viper v1.13.0
 	github.com/uhey22e/sqlboiler-tutor v0.0.0-20180916072804-2030b8fb6b6a

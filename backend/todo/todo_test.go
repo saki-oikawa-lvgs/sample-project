@@ -19,7 +19,7 @@ var testApp App
 
 func TestMain(m *testing.M) {
 	// connect to db
-	psqlInfo := fmt.Sprintf("host=postgres user=postgres port=5432 password=postgres dbname=postgres sslmode=disable")
+	psqlInfo := fmt.Sprintf("host=localhost user=saki.oikawa port=5432 password=postgres dbname=postgres sslmode=disable")
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)

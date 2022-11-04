@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/common"
 	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/customTypes"
 	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/generated"
 )
@@ -19,21 +18,12 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, text string) (*custom
 
 // GetTodos is the resolver for the getTodos field.
 func (r *queryResolver) GetTodos(ctx context.Context) ([]*customTypes.Todo, error) {
-	context := common.GetContext(ctx)
-	var todos []*customTypes.Todo
-	err := context.Database.Find(&todos).Error
-	if err != nil {
-		return nil, err
-	}
-	//ここに追加する
-	return todos, nil
+	panic(fmt.Errorf("not implemented: GetTodos - getTodos"))
 }
 
 // Post is the resolver for the post field.
 func (r *todoResolver) Post(ctx context.Context, obj *customTypes.Todo) (*customTypes.Post, error) {
-	return &customTypes.Post{
-		ID: obj.PostID,
-	}, nil
+	panic(fmt.Errorf("not implemented: Post - post"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

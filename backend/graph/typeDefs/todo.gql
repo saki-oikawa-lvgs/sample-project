@@ -1,6 +1,6 @@
 # @/graph/typeDefs/todo.gql
 type Todo @key(fields: "id") {
-  id: ID!
+  id: Int!
   text: String!
   done: Boolean!
   post_id: Int!

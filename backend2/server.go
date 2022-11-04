@@ -2,11 +2,11 @@
 package main
 
 import (
-		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/common"
-		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/generated"
+		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/common"
+		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/generated"
 	
 		"github.com/rs/cors"
-    resolvers 		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/resolvers"
+    resolvers 		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/resolvers"
     "log"
     "net/http"
     "os"
