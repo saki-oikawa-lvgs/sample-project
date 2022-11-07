@@ -5,10 +5,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/customTypes"
 	"github.com/saki-oikawa-lvgs/sample-project/backend/graph/generated"
+	"github.com/saki-oikawa-lvgs/sample-project/backend/service"
 )
 
 // FindPostByID is the resolver for the findPostByID field.
@@ -20,7 +20,7 @@ func (r *entityResolver) FindPostByID(ctx context.Context, id int) (*customTypes
 
 // FindTodoByID is the resolver for the findTodoByID field.
 func (r *entityResolver) FindTodoByID(ctx context.Context, id int) (*customTypes.Todo, error) {
-	panic(fmt.Errorf("not implemented: FindTodoByID - findTodoByID"))
+	return service.TodoFindByID(id)
 }
 
 // Entity returns generated.EntityResolver implementation.

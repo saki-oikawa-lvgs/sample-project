@@ -97,10 +97,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 					return fmt.Errorf(`resolving Entity "Post": %w`, err)
 				}
 
-				entity.ID, err = ec.unmarshalNInt2int(ctx, rep["id"])
-				if err != nil {
-					return err
-				}
 				list[idx[i]] = entity
 				return nil
 			}

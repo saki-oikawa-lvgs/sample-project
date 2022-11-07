@@ -1,16 +1,21 @@
 # @/graph/typeDefs/post.gql
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Post @key(fields: "id") {
   id: Int!
   text: String!
   done: Boolean!
-  todo: Todo!
+}
+
+input NewPost {
+  text: String!
+  done: Boolean!
 }
 
 type Query {
   getPosts: [Post!]!
 }
 
-extend type Todo @key(fields: "id") {
-    id: Int! @external
-    posts: [Post]
-  }
+type Mutation {
+  create_post(input: NewPost!): Post!
+}

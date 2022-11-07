@@ -2,11 +2,11 @@
 package main
 
 import (
-		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/common"
+		// "github.com/saki-oikawa-lvgs/sample-project/backend2/graph/common"
 		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/generated"
 	
-		"github.com/rs/cors"
-    resolvers 		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/resolvers"
+		// "github.com/rs/cors"
+    // resolvers 		"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/resolvers"
     "log"
     "net/http"
     "os"
@@ -21,7 +21,7 @@ type Ping struct {
   Rssult string
 }
 
-const defaultPort = "8081"
+const defaultPort = "8082"
 func pingHandler(w http.ResponseWriter, r *http.Request) {
   ping := Ping{http.StatusOK, "ok"}
 
@@ -43,10 +43,10 @@ func main() {
     }
 
 		// common.InitDb()
-    db, err := common.InitDb()
-    if err != nil {
-        log.Fatal(err)
-    }
+    db := common.InitDb()
+    // if err != nil {
+    //     log.Fatal(err)
+    // }
 		c := cors.New(cors.Options{
 			AllowedOrigins:   []string{"http://localhost:3000"},
 			AllowCredentials: true,

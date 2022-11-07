@@ -2,20 +2,24 @@
 
 package customTypes
 
+type NewTodo struct {
+	Text   *string `json:"text"`
+	Done   *bool   `json:"done"`
+	PostID int     `json:"post_id"`
+}
+
 type Post struct {
-	ID   int     `json:"id"`
-	Text string  `json:"text"`
-	Todo []*Todo `json:"todo"`
+	ID    int     `json:"id"`
+	Posts []*Post `json:"posts"`
 }
 
 func (Post) IsEntity() {}
 
 type Todo struct {
-	ID     int    `json:"id"`
-	Text   string `json:"text"`
-	Done   bool   `json:"done"`
-	PostID int    `json:"post_id"`
-	Post   *Post  `json:"post"`
+	ID     int     `json:"id"`
+	Text   *string `json:"text"`
+	Done   *bool   `json:"done"`
+	PostID int     `json:"post_id"`
 }
 
 func (Todo) IsEntity() {}

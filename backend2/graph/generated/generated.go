@@ -38,7 +38,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Entity() EntityResolver
-	Post() PostResolver
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -48,25 +48,22 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Entity struct {
 		FindPostByID func(childComplexity int, id int) int
-		FindTodoByID func(childComplexity int, id int) int
+	}
+
+	Mutation struct {
+		CreatePost func(childComplexity int, input customTypes.NewPost) int
 	}
 
 	Post struct {
 		Done func(childComplexity int) int
 		ID   func(childComplexity int) int
 		Text func(childComplexity int) int
-		Todo func(childComplexity int) int
 	}
 
 	Query struct {
 		GetPosts           func(childComplexity int) int
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
-	}
-
-	Todo struct {
-		ID    func(childComplexity int) int
-		Posts func(childComplexity int) int
 	}
 
 	_Service struct {
@@ -76,10 +73,9 @@ type ComplexityRoot struct {
 
 type EntityResolver interface {
 	FindPostByID(ctx context.Context, id int) (*customTypes.Post, error)
-	FindTodoByID(ctx context.Context, id int) (*customTypes.Todo, error)
 }
-type PostResolver interface {
-	Todo(ctx context.Context, obj *customTypes.Post) (*customTypes.Todo, error)
+type MutationResolver interface {
+	CreatePost(ctx context.Context, input customTypes.NewPost) (*customTypes.Post, error)
 }
 type QueryResolver interface {
 	GetPosts(ctx context.Context) ([]*customTypes.Post, error)
@@ -112,17 +108,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.FindPostByID(childComplexity, args["id"].(int)), true
 
-	case "Entity.findTodoByID":
-		if e.complexity.Entity.FindTodoByID == nil {
+	case "Mutation.create_post":
+		if e.complexity.Mutation.CreatePost == nil {
 			break
 		}
 
-		args, err := ec.field_Entity_findTodoByID_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_create_post_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindTodoByID(childComplexity, args["id"].(int)), true
+		return e.complexity.Mutation.CreatePost(childComplexity, args["input"].(customTypes.NewPost)), true
 
 	case "Post.done":
 		if e.complexity.Post.Done == nil {
@@ -144,13 +140,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Post.Text(childComplexity), true
-
-	case "Post.todo":
-		if e.complexity.Post.Todo == nil {
-			break
-		}
-
-		return e.complexity.Post.Todo(childComplexity), true
 
 	case "Query.getPosts":
 		if e.complexity.Query.GetPosts == nil {
@@ -178,20 +167,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
 
-	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
-			break
-		}
-
-		return e.complexity.Todo.ID(childComplexity), true
-
-	case "Todo.posts":
-		if e.complexity.Todo.Posts == nil {
-			break
-		}
-
-		return e.complexity.Todo.Posts(childComplexity), true
-
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
 			break
@@ -206,7 +181,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputNewPost,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -218,6 +195,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -252,21 +244,26 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../typeDefs/post.gql", Input: `# @/graph/typeDefs/post.gql
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Post @key(fields: "id") {
   id: Int!
   text: String!
   done: Boolean!
-  todo: Todo!
+}
+
+input NewPost {
+  text: String!
+  done: Boolean!
 }
 
 type Query {
   getPosts: [Post!]!
 }
 
-extend type Todo @key(fields: "id") {
-    id: Int! @external
-    posts: [Post]
-  }
+type Mutation {
+  create_post(input: NewPost!): Post!
+}
 `, BuiltIn: false},
 	{Name: "../../federation/directives.graphql", Input: `
 	scalar _Any
@@ -281,12 +278,11 @@ extend type Todo @key(fields: "id") {
 `, BuiltIn: true},
 	{Name: "../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Post | Todo
+union _Entity = Post
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
 		findPostByID(id: Int!,): Post!
-	findTodoByID(id: Int!,): Todo!
 
 }
 
@@ -321,18 +317,18 @@ func (ec *executionContext) field_Entity_findPostByID_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Entity_findTodoByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_create_post_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg0 customTypes.NewPost
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNNewPost2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐNewPost(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -449,8 +445,6 @@ func (ec *executionContext) fieldContext_Entity_findPostByID(ctx context.Context
 				return ec.fieldContext_Post_text(ctx, field)
 			case "done":
 				return ec.fieldContext_Post_done(ctx, field)
-			case "todo":
-				return ec.fieldContext_Post_todo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -469,8 +463,8 @@ func (ec *executionContext) fieldContext_Entity_findPostByID(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Entity_findTodoByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entity_findTodoByID(ctx, field)
+func (ec *executionContext) _Mutation_create_post(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_create_post(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -483,7 +477,7 @@ func (ec *executionContext) _Entity_findTodoByID(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entity().FindTodoByID(rctx, fc.Args["id"].(int))
+		return ec.resolvers.Mutation().CreatePost(rctx, fc.Args["input"].(customTypes.NewPost))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -495,25 +489,27 @@ func (ec *executionContext) _Entity_findTodoByID(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*customTypes.Todo)
+	res := resTmp.(*customTypes.Post)
 	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Entity_findTodoByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_create_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Entity",
+		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_Todo_id(ctx, field)
-			case "posts":
-				return ec.fieldContext_Todo_posts(ctx, field)
+				return ec.fieldContext_Post_id(ctx, field)
+			case "text":
+				return ec.fieldContext_Post_text(ctx, field)
+			case "done":
+				return ec.fieldContext_Post_done(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
 	}
 	defer func() {
@@ -523,7 +519,7 @@ func (ec *executionContext) fieldContext_Entity_findTodoByID(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Entity_findTodoByID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_create_post_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -662,56 +658,6 @@ func (ec *executionContext) fieldContext_Post_done(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Post_todo(ctx context.Context, field graphql.CollectedField, obj *customTypes.Post) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Post_todo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Post().Todo(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*customTypes.Todo)
-	fc.Result = res
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐTodo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Post_todo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Post",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Todo_id(ctx, field)
-			case "posts":
-				return ec.fieldContext_Todo_posts(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_getPosts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getPosts(ctx, field)
 	if err != nil {
@@ -757,8 +703,6 @@ func (ec *executionContext) fieldContext_Query_getPosts(ctx context.Context, fie
 				return ec.fieldContext_Post_text(ctx, field)
 			case "done":
 				return ec.fieldContext_Post_done(ctx, field)
-			case "todo":
-				return ec.fieldContext_Post_todo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -993,101 +937,6 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *customTypes.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Todo_posts(ctx context.Context, field graphql.CollectedField, obj *customTypes.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_posts(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Posts, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*customTypes.Post)
-	fc.Result = res
-	return ec.marshalOPost2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_posts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Post_id(ctx, field)
-			case "text":
-				return ec.fieldContext_Post_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Post_done(ctx, field)
-			case "todo":
-				return ec.fieldContext_Post_todo(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
 	}
 	return fc, nil
@@ -2907,6 +2756,42 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewPost(ctx context.Context, obj interface{}) (customTypes.NewPost, error) {
+	var it customTypes.NewPost
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"text", "done"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "text":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "done":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
+			it.Done, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2922,13 +2807,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Post(ctx, sel, obj)
-	case customTypes.Todo:
-		return ec._Todo(ctx, sel, &obj)
-	case *customTypes.Todo:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Todo(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -2980,29 +2858,45 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "findTodoByID":
-			field := field
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Entity_findTodoByID(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
+var mutationImplementors = []string{"Mutation"}
 
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "create_post":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_create_post(ctx, field)
 			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3029,42 +2923,22 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Post_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "text":
 
 			out.Values[i] = ec._Post_text(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "done":
 
 			out.Values[i] = ec._Post_done(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "todo":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Post_todo(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3175,38 +3049,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
-
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var todoImplementors = []string{"Todo", "_Entity"}
-
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *customTypes.Todo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, todoImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Todo")
-		case "id":
-
-			out.Values[i] = ec._Todo_id(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "posts":
-
-			out.Values[i] = ec._Todo_posts(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -3592,6 +3434,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) unmarshalNNewPost2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐNewPost(ctx context.Context, v interface{}) (customTypes.NewPost, error) {
+	res, err := ec.unmarshalInputNewPost(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPost2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v customTypes.Post) graphql.Marshaler {
 	return ec._Post(ctx, sel, &v)
 }
@@ -3663,20 +3510,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v customTypes.Todo) graphql.Marshaler {
-	return ec._Todo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐTodo(ctx context.Context, sel ast.SelectionSet, v *customTypes.Todo) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Todo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalN_Any2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -4066,54 +3899,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOPost2ᚕᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v []*customTypes.Post) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋsakiᚑoikawaᚑlvgsᚋsampleᚑprojectᚋbackend2ᚋgraphᚋcustomTypesᚐPost(ctx context.Context, sel ast.SelectionSet, v *customTypes.Post) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Post(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

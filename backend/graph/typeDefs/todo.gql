@@ -1,23 +1,29 @@
 # @/graph/typeDefs/todo.gql
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Todo @key(fields: "id") {
   id: Int!
-  text: String!
-  done: Boolean!
+  text: String
+  done: Boolean
   post_id: Int!
-  post: Post
 }
 
-type Mutation {
-  createTodo(text: String!): Todo!
-}
 
 type Query {
   getTodos: [Todo!]!
 }
 
-extend type Post @key(fields: "id") {
-    id: Int! @external
-    text: String! @external
-    todo: [Todo] @requires (fields: "id")
-  }
+input NewTodo {
+  text: String
+  done: Boolean
+  post_id: Int!
+}
 
+type Mutation {
+  create_todo(input: NewTodo!): Todo!
+}
+
+type Post @key(fields: "id") @extends {
+  id: Int! @external
+  posts: [Post!]! @goField(forceResolver: true)
+}

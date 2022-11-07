@@ -1,64 +1,16 @@
-// package main
-
-// //go:generate sqlboiler --wipe --templates ${GOPATH}/src/github.com/volatiletech/sqlboiler/templates,${GOPATH}/src/github.com/volatiletech/sqlboiler/templates_test,${GOPATH}/src/github.com/uhey22e/sqlboiler-tutor/boil_templates --struct-tag-casing camel psql
-
-// import (
-// 	"database/sql"
-// 	"fmt"
-//   "log"
-// 	"net/http"
-// 	"github.com/volatiletech/sqlboiler/v4/boil"
-// 	// "github.com/99designs/gqlgen/graphql/handler"
-// 	"github.com/99designs/gqlgen/graphql/playground"
-// 	_ "github.com/lib/pq"
-//   // "github.com/saki-oikawa-lvgs/sample-project/backend/graph/generated"
-//   // "github.com/saki-oikawa-lvgs/sample-project/backend/graph"
-
-
-// 	// "github.com/uhey22e/sqlboiler-tutor/models"
-//   // "github.com/saki-oikawa-lvgs/sample-project/backend/models"
-//     // "github.com/saki-oikawa-lvgs/sample-project/backend/todo"
-
-
-// 	// "github.com/volatiletech/null"
-// )
-
-// func main() {
-// 	// connect to db
-//   const defaultPort = "8080"
-// 	psqlInfo := fmt.Sprintf("host=postgres user=postgres port=5432 password=postgres dbname=postgres sslmode=disable")
-
-// 	db, err := sql.Open("postgres", psqlInfo)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	// defer db.Close()
-
-// 	boil.SetDB(db)
-// 	boil.DebugMode = true
-// 	// srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-
-// 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-// 	// http.Handle("/query", srv)
-
-// 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)
-// 	// log.Fatal(http.ListenAndServe(":"+port, nil))
-
-// }
-// @/server.go
 package main
 
 import (
-		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/common"
-		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/generated"
-	
-		"github.com/rs/cors"
-    resolvers 		"github.com/saki-oikawa-lvgs/gqlgen_tutorial/server/graph/resolvers"
+	// "github.com/saki-oikawa-lvgs/sample-project/backend/graph/common"
+		"github.com/saki-oikawa-lvgs/sample-project/backend/graph/generated"
+    "github.com/saki-oikawa-lvgs/sample-project/backend/graph"
+
+		// "github.com/rs/cors"
+    // resolvers 		"github.com/saki-oikawa-lvgs/sample-project/backend/graph/resolvers"
     "log"
     "net/http"
     "os"
     "encoding/json"
-
 
     "github.com/99designs/gqlgen/graphql/handler"
     "github.com/99designs/gqlgen/graphql/playground"
@@ -69,7 +21,7 @@ type Ping struct {
   Rssult string
 }
 
-const defaultPort = "8080"
+const defaultPort = "8083"
 func pingHandler(w http.ResponseWriter, r *http.Request) {
   ping := Ping{http.StatusOK, "ok"}
 
@@ -84,45 +36,62 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
   w.Write(res)
 }
 
-func main() {
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = defaultPort
-    }
+// func main() {
+//     port := os.Getenv("PORT")
+//     if port == "" {
+//         port = defaultPort
+//     }
 
-		// common.InitDb()
-    db, err := common.InitDb()
-    if err != nil {
-        log.Fatal(err)
-    }
-		c := cors.New(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:3000"},
-			AllowCredentials: true,
-		})
+// 		// common.InitDb()
+//     db := common.InitDb()
+//     // if err != nil {
+//     //     log.Fatal(err)
+//     // }
+// 		c := cors.New(cors.Options{
+// 			AllowedOrigins:   []string{"http://localhost:3000"},
+// 			AllowCredentials: true,
+// 		})
 
-		// // handler = c.Handler(handler)
-		// mux := http.NewServeMux()
+// 		// // handler = c.Handler(handler)
+// 		// mux := http.NewServeMux()
 
 
-		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
+// 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
 
-    customCtx := &common.CustomContext{
-        Database: db,
-    }
+//     customCtx := &common.CustomContext{
+//         Database: db,
+//     }
 		
-		corsSrv := c.Handler(srv)
+// 		corsSrv := c.Handler(srv)
 
-    http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+//     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		
-    http.Handle("/query", common.CreateContext(customCtx, corsSrv))
-    http.HandleFunc("/ping", pingHandler)
+//     http.Handle("/query", common.CreateContext(customCtx, corsSrv))
 
-		// http.Handle("/query", c.Handler(customCtx, srv))
-		// http.Handle("/query", c.Handler(srv))
+// 		// http.Handle("/query", c.Handler(customCtx, srv))
+// 		// http.Handle("/query", c.Handler(srv))
 
 
-    log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-    log.Fatal(http.ListenAndServe(":"+port, nil))
+//     log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+//     log.Fatal(http.ListenAndServe(":"+port, nil))
   
 
-}
+// }
+func main() {
+
+  //	config.MigrateUp()
+  
+    port := os.Getenv("PORT")
+    if port == "" {
+      port = defaultPort
+    }
+  
+    srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+  
+    http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+    http.Handle("/query", srv)
+  
+    log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+    log.Fatal(http.ListenAndServe(":"+port, nil))
+  }
+  

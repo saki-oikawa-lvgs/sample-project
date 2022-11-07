@@ -3,7 +3,7 @@ version: '3.7'
 services:
   postgres:
     image: postgres
-    # container_name: go-postgresql
+    container_name: go-postgresql1
     # build:
     #   context: .
     #   dockerfile: ./Docker/postgres/Dockerfile
@@ -23,7 +23,7 @@ services:
     #   - postgres
     build: .
     ports:
-      - "8080:8080"
+      - "8083:8083"
     networks:
       - my-network
 

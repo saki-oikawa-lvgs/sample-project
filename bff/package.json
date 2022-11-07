@@ -20,7 +20,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "postinstall": "patch-package"
-
   },
   "dependencies": {
     "@apollo/client": "^3.7.1",
@@ -29,8 +28,9 @@
     "@nestjs/axios": "^0.1.0",
     "@nestjs/common": "^9.1.5",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^10.1.3",
+    "@nestjs/graphql": "^10.1.5",
     "@nestjs/platform-express": "^9.0.0",
+    "apollo-server": "^3.11.1",
     "apollo-server-express": "^3.10.3",
     "apollo-server-micro": "^3.10.3",
     "graphql": "^16.6.0",

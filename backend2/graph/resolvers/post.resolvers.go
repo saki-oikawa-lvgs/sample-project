@@ -6,34 +6,26 @@ package graph
 import (
 	"context"
 
-	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/common"
 	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/customTypes"
 	"github.com/saki-oikawa-lvgs/sample-project/backend2/graph/generated"
+	"github.com/saki-oikawa-lvgs/sample-project/backend2/service"
 )
 
-// Todo is the resolver for the todo field.
-func (r *postResolver) Todo(ctx context.Context, obj *customTypes.Post) (*customTypes.Todo, error) {
-	return &customTypes.Todo{
-		ID: 888,
-	}, nil
+// CreatePost is the resolver for the create_post field.
+func (r *mutationResolver) CreatePost(ctx context.Context, input customTypes.NewPost) (*customTypes.Post, error) {
+	return service.PostCreate(input)
 }
 
 // GetPosts is the resolver for the getPosts field.
 func (r *queryResolver) GetPosts(ctx context.Context) ([]*customTypes.Post, error) {
-	context := common.GetContext(ctx)
-	var posts []*customTypes.Post
-	err := context.Database.Find(&posts).Error
-	if err != nil {
-		return nil, err
-	}
-	return posts, nil
+	return service.PostsGet()
 }
 
-// Post returns generated.PostResolver implementation.
-func (r *Resolver) Post() generated.PostResolver { return &postResolver{r} }
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type postResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
